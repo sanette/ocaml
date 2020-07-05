@@ -102,18 +102,18 @@ a:hover {
   box-shadow: 0 0 0 1px rgba(255, 215, 181, 0.8) !important;
   border-radius: 1px; }
 
-:hover > a.anchor {
+:hover > a.section-anchor {
   visibility: visible; }
 
-a.anchor:before {
+a.section-anchor:before {
   content: "#"; }
 
-a.anchor:hover {
+a.section-anchor:hover {
   box-shadow: none;
   text-decoration: none;
   color: #555; }
 
-a.anchor {
+a.section-anchor {
   visibility: hidden;
   position: absolute;
   margin-left: -1.3em;

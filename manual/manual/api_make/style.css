@@ -191,15 +191,15 @@ html.smooth-scroll {
   .api h2:target {
     /* background: linear-gradient(to bottom, rgb(253, 252, 252) 0%, rgba(255, 215, 181, 0.3) 100%) !important; */
     /*	transition: 300ms; this prevents margin-top:-80 to work... */ }
-  .api *:hover > a.anchor {
+  .api *:hover > a.section-anchor {
     visibility: visible; }
-  .api a.anchor:before {
+  .api a.section-anchor:before {
     content: "#"; }
-  .api a.anchor:hover {
+  .api a.section-anchor:hover {
     box-shadow: none;
     text-decoration: none;
     color: #555; }
-  .api a.anchor {
+  .api a.section-anchor {
     visibility: hidden;
     position: absolute;
     /* top: 0px; */
@@ -211,7 +211,7 @@ html.smooth-scroll {
     padding-left: 0.4em;
     /* To remain selectable */
     color: #d5d5d5; }
-  .api .spec > a.anchor {
+  .api .spec > a.section-anchor {
     margin-left: -2.3em;
     padding-right: 0.9em; }
   .api .xref-unresolved {

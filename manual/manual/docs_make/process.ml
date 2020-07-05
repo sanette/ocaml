@@ -34,7 +34,7 @@ let html_file = Filename.concat html_maindir
 let docs_file = Filename.concat docs_maindir
 
 (* API pages *)
-let api_page_url = "../api"
+let api_page_url = "../api/index.html"
 let releases_url = "https://ocaml.org/releases/"
   
 (**** utilities ****)
@@ -88,12 +88,11 @@ let do_option f = function
 
 let (<<) f g x = f (g x)
 
-(* TODO: change this if upstream *)
+(* will be automatically updated *)
+let copyright_text = ref "Copyright © 2020 Institut National de Recherche en Informatique et en Automatique"
+    
 let copyright () =
-  "<div class=\"copyright\">The present documentation is copyright Institut \
-   National de Recherche en Informatique et en Automatique (INRIA). A complete \
-   version can be obtained from <a \
-   href=\"http://caml.inria.fr/pub/docs/manual-ocaml/\">this page</a>.</div>"
+  "<div class=\"copyright\">" ^ !copyright_text ^ "</div>"
   |> parse
 
 let load_html file =
@@ -172,13 +171,15 @@ let clone_structure soup xfile =
   set_attribute "id" "section" xbody;
   save_to_file clone xfile
 
-(* Extract the date from the maintitle block in "index.html" *)
+(* Extract the date (and copyright) from the maintitle block in "index.html" *)
 let extract_date maintitle =
   let months = ["January"; "February"; "March"; "April";
                 "May"; "June"; "July"; "August"; "September";
                 "October"; "November"; "December"] in
-  texts maintitle
-  |> List.map String.trim
+  let txts = texts maintitle
+             |> List.map String.trim in
+  copyright_text := List.hd (List.rev txts);
+  txts
   |> List.filter (fun s -> List.exists (fun month -> starts_with month s) months)
   |> function | [s] -> Some s
               | _ -> print_endline "Warning, date not found"; None

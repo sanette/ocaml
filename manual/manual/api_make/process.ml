@@ -10,6 +10,8 @@
 open Soup
 open Printf
 
+let releases_url = "https://ocaml.org/releases/"
+
 let compiler_libref = ref false
 (* set this to true to process compilerlibref instead of libref *)
 
@@ -59,18 +61,7 @@ let flat_option f = function
 let string_of_opt = function
   | None -> ""
   | Some s -> s
-
-(* Header for ocaml.org md files. *)
-let md_head = "<!-- ((! set title API !)) ((! set documentation !)) ((! set api !)) ((! set nobreadcrumb !)) -->\n"
   
-(* it doesn't work without the "()" for some reason... (BUG??) *)
-let copyright () =
-  "<div class=\"copyright\">The present documentation is copyright Institut \
-   National de Recherche en Informatique et en Automatique (INRIA). A complete \
-   version can be obtained from <a \
-   href=\"http://caml.inria.fr/pub/docs/manual-ocaml/\">this page</a>.</div>"
-  |> parse
-
 (* We don't add the "onchange" event because it forces to click twice to an
    external link after entering text. *)
 let search_widget with_description =
@@ -86,7 +77,7 @@ let search_widget with_description =
      else "")
   |> parse
 
-let logo_html () = "<nav class=\"toc brand\"><a class=\"brand\" href=\"https://ocaml.org/\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" |> parse
+let logo_html () = "<nav class=\"toc brand\"><a class=\"brand\" href=\"../docs/index.html\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" |> parse
   
 let process ?(search=true) ~version file out =
 
@@ -187,17 +178,12 @@ let process ?(search=true) ~version file out =
   (* Add version number *)
   let vnum = create_element "div" ~class_:"toc_version" in
   let a = create_element "a" ~inner_text:("API Version " ^ version)
-      ~attributes:["href", "../index.html";
-                   "id", "version-select"] in
+      ~attributes:["href", releases_url; "id", "version-select"] in
   append_child vnum a;
   prepend_child nav vnum;
 
   (* Add logo *)
   prepend_child header (logo_html ());
-
-  (* Add copyright *)
-  append_child body (copyright ());
-
 
   sprintf "Saving %s..." out |> pr;
 

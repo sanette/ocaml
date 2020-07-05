@@ -291,21 +291,21 @@ html.smooth-scroll {
 	/*	transition: 300ms; this prevents margin-top:-80 to work... */
     }
 
-    *:hover>a.anchor {
+    *:hover>a.section-anchor {
 	visibility: visible;
     }
 
-    a.anchor:before {
+    a.section-anchor:before {
 	content: "#"
     }
 
-    a.anchor:hover {
+    a.section-anchor:hover {
 	box-shadow: none;
 	text-decoration: none;
 	color: #555;
     }
 
-    a.anchor {
+    a.section-anchor {
 	visibility: hidden;
 	position: absolute;
 	/* top: 0px; */
@@ -319,7 +319,7 @@ html.smooth-scroll {
 	color: #d5d5d5;
     }
 
-    .spec > a.anchor {
+    .spec > a.section-anchor {
 	margin-left: -2.3em;
 	padding-right: 0.9em;
     }
