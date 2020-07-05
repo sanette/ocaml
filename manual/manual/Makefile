@@ -118,6 +118,10 @@ release: all
 	cp textman/manual.txt $(RELEASE)refman.txt
 	tar cf - infoman/ocaml.info* | gzip > $(RELEASE)refman.info.tar.gz
 
+web: html
+	dune exec docs_make/process.exe
+	dune exec api_make/process.exe makeindex
+	dune exec api_make/process.exe overwrite
 
 files: $(FILES)
 	$(MAKE) -C cmds      all
@@ -170,3 +174,5 @@ clean:
 	manual*.html *.haux *.hind *.svg
 	cd textman; rm -f manual.txt *.haux *.hind
 	cd infoman; rm -f ocaml.info ocaml.info-*  *.haux *.hind
+	rm -rf docs/
+	rm -rf api/

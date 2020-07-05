@@ -1,15 +1,13 @@
-(* Post-processing the HTML of the OCaml Manual. This file is part of
-   https://github.com/sanette/ocaml-tutorial
+(* Post-processing the HTML of the OCaml Manual.
 
    * Processed parts: ["tutorials"; "refman"; "commands"; "library" ]
 
-   * The "API" side is treated by another script:
-   https://github.com/sanette/ocaml-api
-
+   * The "API" side is treated by another script.
+   
    requires Lambdasoup
    
    To execute this file, cd to the directory where the "htmlman" and "docs" dirs
-   reside, and [dune exec src/process_standalone.exe]
+   reside, and [dune exec docs_make/process.exe]
 
  *)
 
@@ -36,7 +34,8 @@ let html_file = Filename.concat html_maindir
 let docs_file = Filename.concat docs_maindir
 
 (* API pages *)
-let api_page_url = "docs/api"
+let api_page_url = "../api"
+let releases_url = "https://ocaml.org/releases/"
   
 (**** utilities ****)
 
@@ -97,7 +96,7 @@ let copyright () =
    href=\"http://caml.inria.fr/pub/docs/manual-ocaml/\">this page</a>.</div>"
   |> parse
 
-let load_html ~version file =
+let load_html file =
   pr file;
   (* First we perform some direct find/replace in the html string. *)
   (* Warning charset = ascii for 4.05 and utf8 for >=4.09.  But the original
@@ -123,16 +122,6 @@ let load_html ~version file =
     |> Str.global_replace (Str.regexp ">[0-9]+\\.\\([0-9]+\\) ") ">\\1 "
     |> Str.global_replace (Str.regexp "[0-9]+\\.\\([0-9]+\\.[0-9]+\\) ")
       "\\1 "
-
-    (* The API (libref and compilerlibref directories) should be separate
-       entities, to better distinguish them from the manual. *)
-    |> Str.global_replace (Str.regexp_string "\"libref/")
-      (sprintf "\"%s/%s/" api_page_url version)
-    |> Str.global_replace (Str.regexp_string "\"compilerlibref/")
-      (sprintf "\"%s/compilerlibref/%s/" api_page_url version)
-
-  (* |> Str.global_replace (Str.regexp_string file) "" *)
-  (* that one was not necessary; it's just cleaner not to link to oneself. *)
   in
 
   (* For the main index file, we do a few adjustments *)
@@ -166,8 +155,8 @@ let remove_navigation soup =
   
 (* Create a new file by cloning the structure of "soup", and inserting the
    content of external file (hence preserving TOC and headers) *)
-let clone_structure ~version soup xfile =
-  let xternal = parse (load_html ~version xfile) in
+let clone_structure soup xfile =
+  let xternal = parse (load_html xfile) in
   remove_navigation xternal;
   do_option delete (xternal $? "hr");
   let xbody = xternal $ "body" in
@@ -220,7 +209,7 @@ let convert version chapters (title, file) =
     ((html_file file) ^ " ==> " ^ (docs_file file));
 
   (* Parse html *)
-  let soup = parse (load_html ~version file) in
+  let soup = parse (load_html file) in
 
   (* Change title *)
   let title_tag = soup $ "title" in
@@ -296,7 +285,7 @@ let convert version chapters (title, file) =
           end;
           (* Link to API *)
           let a = create_element "a" ~inner_text:"OCaml API"
-              ~attributes:["href", api_page_url ^ "/" ^ version] in
+              ~attributes:["href", api_page_url] in
           let li = create_element "li" in
           (append_child li a;
            append_child toc li)
@@ -318,7 +307,7 @@ let convert version chapters (title, file) =
   let version_text = if file = "index.html" then "Select another version"
     else "Version " ^ version in
   let a = create_element "a" ~inner_text:version_text
-      ~attributes:["href", "../index.html"; "id", "version-select"] in
+      ~attributes:["href", releases_url; "id", "version-select"] in
   append_child vnum a;
   prepend_child nav vnum;
 
@@ -379,7 +368,7 @@ let convert version chapters (title, file) =
   append_child body (copyright ());
 
   (* Generate external files *)
-  List.iter (clone_structure ~version soup) xfiles;
+  List.iter (clone_structure soup) xfiles;
 
   (* And finally save *)
   save_to_file soup file
@@ -439,9 +428,10 @@ let find_version () =
 (******************************************************************************)
 
 let () =
+  sys_mkdir docs_maindir;
   List.iter (fun file ->
       sys_cp (Filename.concat src_dir file) (Filename.concat docs_maindir file))
-    ["colour-logo-gray.svg"; "index.html"; "manual.css"];
+    ["colour-logo-gray.svg"; "manual.css"];
 
   let all_versions = [find_version ()] in
   List.map (fun v -> v, process v) all_versions
