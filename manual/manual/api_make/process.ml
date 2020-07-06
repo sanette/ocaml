@@ -1,6 +1,6 @@
 (* Post-processing the HTML of the OCaml API.
 
-         requires Lambdasoup
+   requires Lambdasoup
    
    To execute this file, cd to the directory where the "htmlman" and "docs" dirs
    reside, and [dune exec api_make/process.exe]
@@ -15,17 +15,31 @@ let releases_url = "https://ocaml.org/releases/"
 let compiler_libref = ref false
 (* set this to true to process compilerlibref instead of libref *)
 
+(* Set this to the directory where to find the html sources of all versions: *)
+let html_maindir = "htmlman"
+
+(* Where this script resides *)
+let make_dir = "api_make"
+
 (* output dir *)
 let api_dir = "api"
 
 let libref = ref ""
+let dst_dir = ref ""
+let src_dir = ref ""
 
-let set_libref () =
-  libref := if !compiler_libref then "compilerlibref" else "libref"
+let with_dir = Filename.concat  
 
-let () = set_libref ()
+let set_dirs () =
+  libref := if !compiler_libref then "compilerlibref" else "libref";
+  dst_dir :=
+    if !compiler_libref then !libref |> with_dir api_dir
+    else api_dir;
+  src_dir := !libref |> with_dir html_maindir
+
+let () = set_dirs ()
         
-let favicon () = if !compiler_libref then "../../favicon.ico" else "../favicon.ico"
+let favicon () = if !compiler_libref then "../favicon.ico" else "favicon.ico"
     
 let debug = match Array.to_list Sys.argv with
   | [] -> true
@@ -33,18 +47,6 @@ let debug = match Array.to_list Sys.argv with
   
 let pr = if debug then print_endline else fun _ -> ()
 let home = "."
-let with_dir = Filename.concat
-
-(* Where this script resides *)
-let make_dir = "api_make"
-  
-(* Set this to the directory where to find the html sources of all versions: *)
-let html_maindir = "htmlman"
-(* This is the destination directory: *)
-let dst_dir =
-  if !compiler_libref then !libref |> with_dir api_dir
-  else api_dir
-let src_dir = !libref |> with_dir html_maindir
 
 let do_option f = function
   | None -> ()
@@ -198,7 +200,7 @@ let process ?(overwrite=false) ~version file out =
   else Error (sprintf "File %s already exists." out)
 
 let all_html_files () =
-  Sys.readdir (with_dir home src_dir) |> Array.to_list
+  Sys.readdir (with_dir home !src_dir) |> Array.to_list
   |> List.filter (fun s -> Filename.extension s = ".html")
 
 
@@ -223,7 +225,7 @@ let parse_tdlist = function
 
 let make_index () =
   let html = read_file ("index_values.html"
-                        |> with_dir src_dir
+                        |> with_dir !src_dir
                         |> with_dir home) in
   let soup = parse html in
   soup $ "table"
@@ -307,7 +309,7 @@ module Index = struct
   let get_sig ?mod_name ~id file  =
     sprintf "Looking for signature for %s in %s" id file |> pr;
     let anon_t_regexp = Str.regexp "\\bt\\b" in
-    let inch = open_in (file |> with_dir src_dir) in
+    let inch = open_in (file |> with_dir !src_dir) in
     let reg = Str.regexp_string (sprintf {|id="%s"|} id) in
     (* let reg_type = Str.regexp {|<code class="type">\(.+\)</code>|} in *)
     let rec loop () = try
@@ -341,7 +343,7 @@ module Index = struct
 
   let make ?(with_sig = true) () =
     let ch = Scanning.open_in ("index_values.html"
-                               |> with_dir src_dir) in
+                               |> with_dir !src_dir) in
     find ch "<table>";
     let rec loop list =
       if try find ch "<tr><td><a"; false with Not_found -> true
@@ -411,8 +413,8 @@ let process_html overwrite version =
   all_html_files ()
   |> List.iter (fun file ->
       match process ~overwrite ~version
-              (file |> with_dir src_dir |> with_dir home)
-              (file |> with_dir dst_dir |> with_dir home) with
+              (file |> with_dir !src_dir |> with_dir home)
+              (file |> with_dir !dst_dir |> with_dir home) with
       | Ok () -> incr processed
       | Error s -> pr s
     );
@@ -431,11 +433,11 @@ let sys_mv file dst =
 
 let copy_css () =
   sys_cp (sprintf "%s/%s/index.js" make_dir !libref)
-    (with_dir dst_dir "index.js");
-  ["style.css"; "search.js"; "scroll.js";
+    (with_dir !dst_dir "index.js");
+  ["style.css"; "search.js"; "scroll.js"; "favicon.ico";
    "colour-logo-gray.svg"; "search_icon.svg"] 
   |> List.iter (fun src ->
-      let dst = src |> with_dir dst_dir in
+      let dst = src |> with_dir !dst_dir in
       sys_cp (with_dir make_dir src) dst)
 
 let find_version () =
@@ -447,8 +449,8 @@ let () =
   let version = find_version () in
   let args = Sys.argv |> Array.to_list |> List.tl in
   compiler_libref := List.mem "compiler" args;
-  set_libref ();
-  sys_mkdir dst_dir;
+  set_dirs ();
+  sys_mkdir !dst_dir;
   let overwrite = List.mem "overwrite" args in
   let makeindex = List.mem "makeindex" args in
   let makehtml = List.mem "html" args || not makeindex in

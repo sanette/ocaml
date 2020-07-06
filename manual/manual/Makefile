@@ -122,6 +122,7 @@ web: html
 	dune exec docs_make/process.exe
 	dune exec api_make/process.exe makeindex
 	dune exec api_make/process.exe overwrite
+	dune exec api_make/process.exe compiler overwrite
 
 files: $(FILES)
 	$(MAKE) -C cmds      all
