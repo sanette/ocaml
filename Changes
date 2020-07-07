@@ -3,7 +3,7 @@ Working version
 
 ### Language features:
 
-* #9500: Injectivity annotations
+* #9500, #9727: Injectivity annotations
   One can now mark type parameters as injective, which is useful for
   abstract types:
     module Vec : sig type !'a t end = struct type 'a t = 'a array end
@@ -76,6 +76,10 @@ Working version
 * #9697: Remove the Is_in_code_area macro and the registration of DLL code
   areas in the page table, subsumed by the new code fragment management API
   (Xavier Leroy, review by Jacques-Henri Jourdan)
+
+- #9710: Drop "support" for an hypothetical JIT for OCaml bytecode
+   which has never existed.
+  (Jacques-Henri Jourdan, review by Xavier Leroy)
 
 ### Code generation and optimizations:
 
@@ -213,6 +217,9 @@ Working version
   contains the output of executed programs.
   (Nicolás Ojeda Bär, review by David Allsopp, Sébastien Hinderer and Gabriel
   Scherer)
+
+- #9688: Expose the main entrypoint in compilerlibs
+  (Stephen Dolan, review by Nicolás Ojeda Bär, Greta Yorsh and David Allsopp)
 
 ### Build system:
 
