@@ -119,10 +119,10 @@ release: all
 	tar cf - infoman/ocaml.info* | gzip > $(RELEASE)refman.info.tar.gz
 
 web: html
-	dune exec docs_make/process.exe
-	dune exec api_make/process.exe makeindex
-	dune exec api_make/process.exe overwrite
-	dune exec api_make/process.exe compiler overwrite
+	dune exec html_processing/process_manual.exe
+	dune exec html_processing/process_api.exe makeindex
+	dune exec html_processing/process_api.exe overwrite
+	dune exec html_processing/process_api.exe compiler overwrite
 
 files: $(FILES)
 	$(MAKE) -C cmds      all

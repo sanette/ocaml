@@ -1,25 +1,21 @@
 (* Post-processing the HTML of the OCaml API.
 
+   San Vu Ngoc, 2020
+
    requires Lambdasoup
-   
-   To execute this file, cd to the directory where the "htmlman" and "docs" dirs
-   reside, and [dune exec api_make/process.exe]
+
+   cd ..; make web
 
  *)
 
 open Soup
 open Printf
+open Common
 
 let releases_url = "https://ocaml.org/releases/"
 
 let compiler_libref = ref false
 (* set this to true to process compilerlibref instead of libref *)
-
-(* Set this to the directory where to find the html sources of all versions: *)
-let html_maindir = "htmlman"
-
-(* Where this script resides *)
-let make_dir = "api_make"
 
 (* output dir *)
 let api_dir = "api"
@@ -27,8 +23,6 @@ let api_dir = "api"
 let libref = ref ""
 let dst_dir = ref ""
 let src_dir = ref ""
-
-let with_dir = Filename.concat  
 
 let set_dirs () =
   libref := if !compiler_libref then "compilerlibref" else "libref";
@@ -38,34 +32,11 @@ let set_dirs () =
   src_dir := !libref |> with_dir html_maindir
 
 let () = set_dirs ()
-        
+
 let favicon () = if !compiler_libref then "../favicon.ico" else "favicon.ico"
-    
-let debug = match Array.to_list Sys.argv with
-  | [] -> true
-  | list -> not (List.mem "silent" list)
-  
-let pr = if debug then print_endline else fun _ -> ()
-let home = "."
 
-let do_option f = function
-  | None -> ()
-  | Some x -> f x
-
-let map_option f = function
-  | None -> None
-  | Some x -> Some (f x)
-
-let flat_option f = function
-  | None -> None
-  | Some x -> f x
-
-let string_of_opt = function
-  | None -> ""
-  | Some s -> s
-  
-(* We don't add the "onchange" event because it forces to click twice to an
-   external link after entering text. *)
+(* HTML code for the search widget. We don't add the "onchange" event because it
+   forces to click twice to an external link after entering text. *)
 let search_widget with_description =
   sprintf "<div class=\"api_search\"><input type=\"text\" name=\"apisearch\" id=\"api_search\"
 	 oninput    = \"mySearch(%b);\"
@@ -79,8 +50,6 @@ let search_widget with_description =
      else "")
   |> parse
 
-let logo_html () = "<nav class=\"toc brand\"><a class=\"brand\" href=\"../docs/index.html\" ><img src=\"colour-logo-gray.svg\" class=\"svg\" alt=\"OCaml\" /></a></nav>" |> parse
-  
 let process ?(search=true) ~version file out =
 
   sprintf "Processing %s ..." file |> pr;
@@ -90,10 +59,10 @@ let process ?(search=true) ~version file out =
   (* Add javascript files *)
   if search then begin
     let head = soup $ "head" in
-    create_element "script" ~attributes:["src","search.js"] 
+    create_element "script" ~attributes:["src","search.js"]
     |> append_child head;
     create_element "script" ~attributes:["src","scroll.js"]
-    |> append_child head;  
+    |> append_child head;
   end;
 
   (* Add favicon *)
@@ -102,11 +71,8 @@ let process ?(search=true) ~version file out =
   |> parse
   |> append_child head;
 
-  (* Add content wrapper *)
-  let body = soup $ "body" in
-  set_name "div" body;
-  add_class "api" body;
-  wrap body (create_element "body");
+  (* Add api wrapper *)
+  let body = wrap_body ~classes:["api"] soup in
 
   (* Delete previous/up/next links *)
   body $? "div.navbar"
@@ -178,29 +144,24 @@ let process ?(search=true) ~version file out =
       |> prepend_child nav in
 
   (* Add version number *)
-  let vnum = create_element "div" ~class_:"toc_version" in
-  let a = create_element "a" ~inner_text:("API Version " ^ version)
-      ~attributes:["href", releases_url; "id", "version-select"] in
-  append_child vnum a;
-  prepend_child nav vnum;
+  add_version_link nav ("API Version " ^ version) releases_url;
 
   (* Add logo *)
-  prepend_child header (logo_html ());
+  prepend_child header (logo_html "../docs/index.html");
 
   sprintf "Saving %s..." out |> pr;
 
   (* Save new html file *)
   let new_html = to_string soup in
   write_file out new_html
-    
-      
+
 let process ?(overwrite=false) ~version file out =
   if overwrite || not (Sys.file_exists out)
   then Ok (process ~version file out)
   else Error (sprintf "File %s already exists." out)
 
 let all_html_files () =
-  Sys.readdir (with_dir home !src_dir) |> Array.to_list
+  Sys.readdir !src_dir |> Array.to_list
   |> List.filter (fun s -> Filename.extension s = ".html")
 
 
@@ -223,10 +184,10 @@ let parse_tdlist = function
     (mdule, value, (infohtml, infotext))
   | _ -> raise (Invalid_argument "parse_tdlist")
 
+(* Generate the index using Lambdasoup ==> very slow, see below. *)
 let make_index () =
   let html = read_file ("index_values.html"
-                        |> with_dir !src_dir
-                        |> with_dir home) in
+                        |> with_dir !src_dir) in
   let soup = parse html in
   soup $ "table"
   |> select "tr"
@@ -269,7 +230,7 @@ module Index = struct
      words are replaced by single ' 's. *)
   let concat_before ch word =
     let b = Buffer.create 256 in
-    let rec loop () = 
+    let rec loop () =
       if Scanning.end_of_input ch then raise Not_found;
       let next = bscanf ch "%s " sid in
       if next <> word then begin
@@ -300,7 +261,7 @@ module Index = struct
     fun s -> Str.global_replace reg "\\1" s
              |> Str.global_replace reg_br " "
              |> Str.global_replace reg_space " "
-             
+
   (* Look for signature (with and without html formatting);
      [id] is the HTML id of the value. Example:
      # get_sig ~version:"4.10" ~id:"VALfloat_of_int" "Pervasives.html";;
@@ -330,7 +291,7 @@ module Index = struct
           sprintf "Signature=[%s]" sig_txt |> pr;
           close_in inch; Some (to_string code |> String.escaped, sig_txt)
         with
-        | Not_found -> loop () 
+        | Not_found -> loop ()
       with
       | End_of_file -> close_in inch; None in
     loop ()
@@ -396,54 +357,40 @@ let save_index file index =
   close_out outch
 
 let process_index ?(fast=true) () =
-  pr "Recreatig index file, please wait...";
+  pr "Recreating index file, please wait...";
   let t = Unix.gettimeofday () in
   let index = if fast then Index.make ()
     else make_index () |> List.map (fun (a,b,c) -> (a,b,c,None)) in
   sprintf "Index created. Time = %f\n" (Unix.gettimeofday () -. t) |> pr;
-  save_index (with_dir home (sprintf "%s/%s/index.js" make_dir !libref)) index;
+  save_index (sprintf "%s/%s/index.js" script_dir !libref) index;
   sprintf "Index saved. Time = %f\n" (Unix.gettimeofday () -. t) |> pr
 
-let sys_mkdir dir =
-  if Sys.command (sprintf "mkdir -p %s" dir) <> 0
-  then failwith ("Could not create directory" ^ dir)
-
 let process_html overwrite version =
+  print_endline (sprintf "\nProcessing version %s...\n" version);
   let processed = ref 0 in
   all_html_files ()
   |> List.iter (fun file ->
       match process ~overwrite ~version
-              (file |> with_dir !src_dir |> with_dir home)
-              (file |> with_dir !dst_dir |> with_dir home) with
+              (file |> with_dir !src_dir)
+              (file |> with_dir !dst_dir) with
       | Ok () -> incr processed
       | Error s -> pr s
     );
   sprintf "Version %s, HTML processing done: %u files have been processed."
-    version !processed |> pr
+    version !processed |> print_endline
 
-(*-------------------------*)
-  
-let sys_cp file dst =
-  if Sys.command (sprintf "cp %s %s" file dst) <> 0
-  then failwith ("Could not copy " ^ file)
-
-let sys_mv file dst =
-  if Sys.command (sprintf "mv %s %s" file dst) <> 0
-  then failwith ("Could not move " ^ file)
-
-let copy_css () =
-  sys_cp (sprintf "%s/%s/index.js" make_dir !libref)
-    (with_dir !dst_dir "index.js");
-  ["style.css"; "search.js"; "scroll.js"; "favicon.ico";
-   "colour-logo-gray.svg"; "search_icon.svg"] 
+let copy_files () =
+  compile_css "style.scss" (with_dir !dst_dir "style.css");
+  let ind = sprintf "%s/%s/index.js" script_dir !libref in
+  if not (Sys.file_exists ind) then process_index ();
+  sys_cp ind (with_dir !dst_dir "index.js");
+  ["search.js"; "scroll.js"; "favicon.ico";
+ "colour-logo-gray.svg"; "search_icon.svg"]
   |> List.iter (fun src ->
       let dst = src |> with_dir !dst_dir in
-      sys_cp (with_dir make_dir src) dst)
+      sys_cp (with_dir script_dir src) dst)
 
-let find_version () =
-  let versiontex = "version.tex" in
-  Scanf.bscanf (Scanf.Scanning.from_file versiontex)
-    "\\def\\ocamlversion{%s@}" (fun a -> a);; 
+(******************************************************************************)
 
 let () =
   let version = find_version () in
@@ -456,5 +403,11 @@ let () =
   let makehtml = List.mem "html" args || not makeindex in
   if makehtml then process_html overwrite version;
   if makeindex then process_index ();
-  copy_css ();
+  copy_files ();
+  print_endline "DONE."
 
+(*
+   Local Variables:
+   compile-command:"dune build"
+   End:
+*)

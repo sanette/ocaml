@@ -1,62 +1,34 @@
 (* Post-processing the HTML of the OCaml Manual.
 
+   San Vu Ngoc, 2020
+
    * Processed parts: ["tutorials"; "refman"; "commands"; "library" ]
 
    * The "API" side is treated by another script.
-   
+
    requires Lambdasoup
-   
-   To execute this file, cd to the directory where the "htmlman" and "docs" dirs
-   reside, and [dune exec docs_make/process.exe]
+
+   cd ..; make web
 
  *)
 
 open Soup
 open Printf
+open Common
 
-let debug = false
-let pr = if debug then print_endline else fun _ -> ()
-
-let src_dir = "docs_make"
-  
-(* Set this to the directory where to find the html sources of all versions: *)
-let html_maindir = "htmlman"
 (* Set this to the destination directory: *)
 let docs_maindir = "docs"
 (* Alternative formats for the manual: *)
 let archives =
   ["refman-html.tar.gz"; "refman.txt"; "refman.pdf"; "refman.info.tar.gz"]
 
-(* Where to get the original html files *)
-let html_file = Filename.concat html_maindir 
-
 (* Where to save the modified html files *)
-let docs_file = Filename.concat docs_maindir
+let docs_file = with_dir docs_maindir
 
 (* API pages *)
 let api_page_url = "../api/index.html"
 let releases_url = "https://ocaml.org/releases/"
-  
-(**** utilities ****)
 
-let starts_with substring s =
-  let l = String.length substring in
-  l <= String.length s &&
-  String.sub s 0 l = substring
-
-let string_of_opt = function
-  | None -> ""
-  | Some s -> s
-    
-(**** html processing ****)
-
-(* Return next html element. *)
-let rec next node =
-  match next_element node with
-  | Some n -> n
-  | None -> match parent node with
-    | Some p -> next p
-    | None -> raise Not_found
 
 (* Remove number: "Chapter 1  The core language" ==> "The core language" *)
 let remove_number s =
@@ -81,16 +53,10 @@ let index part =
     |> List.rev in
   part
 
-(* Some syntax... *)
-let do_option f = function
-  | None -> ()
-  | Some x -> f x
-
-let (<<) f g x = f (g x)
 
 (* will be automatically updated *)
 let copyright_text = ref "Copyright © 2020 Institut National de Recherche en Informatique et en Automatique"
-    
+
 let copyright () =
   "<div class=\"copyright\">" ^ !copyright_text ^ "</div>"
   |> parse
@@ -138,7 +104,7 @@ let load_html file =
     | "us-ascii" -> pr "Charset is US-ASCII. We change it to UTF-8";
       Str.global_replace charset_regexp "charset=UTF-8\\2" html
     | _ -> pr "Warning, charset not recognized."; html
-      
+
 (* Save new html file *)
 let save_to_file soup file =
   let new_html = to_string soup in
@@ -151,7 +117,7 @@ let remove_navigation soup =
   |> List.iter (fun s ->
       soup $$ ("img[alt=\"" ^ s ^ "\"]")
       |> iter (do_option delete << parent))
-  
+
 (* Create a new file by cloning the structure of "soup", and inserting the
    content of external file (hence preserving TOC and headers) *)
 let clone_structure soup xfile =
@@ -182,8 +148,8 @@ let extract_date maintitle =
   txts
   |> List.filter (fun s -> List.exists (fun month -> starts_with month s) months)
   |> function | [s] -> Some s
-              | _ -> print_endline "Warning, date not found"; None
-    
+              | _ -> pr "Warning, date not found"; None
+
 (* Special treatment of the main index.html file *)
 let convert_index version soup =
   (* Remove "translated from LaTeX" *)
@@ -200,14 +166,12 @@ let convert_index version soup =
   {|<span class="authors">Xavier Leroy,<br> Damien Doligez, Alain Frisch, Jacques Garrigue, Didier Rémy and Jérôme Vouillon</span>|}
   |> parse
   |> append_child body
-  
-    
+
 (* This is the main script for processing a specified file. [convert] has to be
    run for each "entry" [file] of the manual, making a "Chapter".  (the list of
    [chapters] corresponds to a "Part" of the manual) *)
 let convert version chapters (title, file) =
-  print_endline
-    ((html_file file) ^ " ==> " ^ (docs_file file));
+  pr ((html_file file) ^ " ==> " ^ (docs_file file));
 
   (* Parse html *)
   let soup = parse (load_html file) in
@@ -218,20 +182,11 @@ let convert version chapters (title, file) =
   replace title_tag new_title;
 
   (* Wrap body. TODO use set_name instead *)
-  let body = soup $ "body" in
-  wrap body (create_element "body");
-  let body = soup $ "body" in
-  let dummy = body $ "body" in
   let c = if file = "index.html" then ["manual"; "content"; "index"]
     else ["manual"; "content"] in
-  wrap dummy (create_element "div" ~classes:c);
-  let body = body $ "body" in
-  unwrap body;
-  let body = soup $ "div.content" in
-  (* let dummy = create_element "div" ~attributes:["id", "top"] in
-   * prepend_child body dummy; *)
+  let body = wrap_body ~classes:c soup in
 
-  remove_navigation soup;
+   remove_navigation soup;
 
   if file = "index.html" then convert_index version soup;
 
@@ -304,13 +259,9 @@ let convert version chapters (title, file) =
   end;
 
   (* Add version number *)
-  let vnum = create_element "div" ~class_:"toc_version" in
   let version_text = if file = "index.html" then "Select another version"
     else "Version " ^ version in
-  let a = create_element "a" ~inner_text:version_text
-      ~attributes:["href", releases_url; "id", "version-select"] in
-  append_child vnum a;
-  prepend_child nav vnum;
+  add_version_link nav version_text releases_url;
 
   (* Create new menu *)
   let menu = create_element "ul" ~class_:"part_menu" in
@@ -327,9 +278,7 @@ let convert version chapters (title, file) =
   (* Add logo *)
   begin match soup $? "header" with
     | None -> sprintf "Warning: no <header> for %s" file |> pr
-    | Some header ->
-      let logo_html = {|<nav class="toc brand"><a class="brand" href="https://ocaml.org/" ><img src="colour-logo-gray.svg" class="svg" alt="OCaml" /></a></nav>|} in
-      prepend_child header (parse logo_html)
+    | Some header -> prepend_child header (logo_html "https://ocaml.org/")
   end;
 
   (* Move authors to the end. Versions >= 4.05 use c009. *)
@@ -373,15 +322,6 @@ let convert version chapters (title, file) =
 
   (* And finally save *)
   save_to_file soup file
-  
-(* Some wrappers around linux system commands*)
-let sys_cp file dst =
-  if Sys.command (sprintf "cp %s %s" file dst) <> 0
-  then failwith ("Could not copy " ^ file)
-
-let sys_mkdir dir =
-  if Sys.command (sprintf "mkdir -p %s" dir) <> 0
-  then failwith ("Could not create directory" ^ dir)
 
 (* Completely process the given version of the manual. Returns the names of the
    main html files. *)
@@ -390,24 +330,21 @@ let process version =
 
   pr (sprintf "Current directory is: %s" (Sys.getcwd ()));
   sys_mkdir docs_maindir;
+
+  pr "* Generating css";
+  compile_css "manual.scss" (docs_file "manual.css");
   
-  pr "* Copying files";
-  let css = let css = sprintf "manual-%s.css" version in
-    if Sys.file_exists (Filename.concat src_dir css)
-    then css, "manual.css" else "manual.css", "manual.css" in
-  let to_copy = css::["colour-logo-gray.svg", "colour-logo-gray.svg"] in
-  List.iter (fun (file, out) ->
+  pr "* Copying logo";
+  ["colour-logo-gray.svg"]
+  |> List.iter (fun file ->
       pr file;
-      sys_cp (Filename.concat src_dir file) (docs_file out)
-    ) to_copy;
+      sys_cp (with_dir script_dir file) (docs_file file)
+    );
 
   (* special case of the "index.html" file *)
-  (* TODO: the inline css styling of this file is quite bad, we should propose
-     something else. *)
   convert version [] ("The OCaml Manual", "index.html");
 
   let parts = ["tutorials"; "refman"; "commands"; "library" ] in
-  (* TODO "appendix" needs a special treatment *)
   let main_files = List.fold_left (fun list part ->
       pr "* Scanning index";
       let chapters = index part in
@@ -418,24 +355,20 @@ let process version =
 
   main_files
 
-let find_version () =
-  (* Str.global_replace (Str.regexp "\\\\def\\\\ocamlversion{\\(.+\\)}") "\\1" s;; *)
-
-  let versiontex = "version.tex" in
-  Scanf.bscanf (Scanf.Scanning.from_file versiontex)
-    "\\def\\ocamlversion{%s@}" (fun a -> a);; 
-
-  
 (******************************************************************************)
 
 let () =
   sys_mkdir docs_maindir;
   List.iter (fun file ->
-      sys_cp (Filename.concat src_dir file) (Filename.concat docs_maindir file))
-    ["colour-logo-gray.svg"; "manual.css"];
+      sys_cp (with_dir script_dir file) (with_dir docs_maindir file))
+    ["colour-logo-gray.svg"];
 
-  let all_versions = [find_version ()] in
-  List.map (fun v -> v, process v) all_versions
-  |> ignore;
-  
-  pr "DONE."
+  let _list = process (find_version ()) in
+
+  print_endline "DONE."
+
+(*
+   Local Variables:
+   compile-command:"dune build"
+   End:
+*)
