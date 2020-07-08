@@ -17,7 +17,7 @@ open Printf
 open Common
 
 (* Set this to the destination directory: *)
-let docs_maindir = "docs"
+let docs_maindir = with_dir script_dir "docs"
 (* Alternative formats for the manual: *)
 let archives =
   ["refman-html.tar.gz"; "refman.txt"; "refman.pdf"; "refman.info.tar.gz"]
@@ -25,8 +25,8 @@ let archives =
 (* Where to save the modified html files *)
 let docs_file = with_dir docs_maindir
 
-(* API pages *)
-let api_page_url = "../api/index.html"
+(* API pages, relative to docs_maindir *)
+let api_page_url = "../api"
 let releases_url = "https://ocaml.org/releases/"
 
 
@@ -87,6 +87,13 @@ let load_html file =
     |> Str.global_replace (Str.regexp ">[0-9]+\\.\\([0-9]+\\) ") ">\\1 "
     |> Str.global_replace (Str.regexp "[0-9]+\\.\\([0-9]+\\.[0-9]+\\) ")
       "\\1 "
+
+    (* The API (libref and compilerlibref directories) should be separate
+       entities, to better distinguish them from the manual. *)
+    |> Str.global_replace (Str.regexp_string "\"libref/")
+      (sprintf "\"%s/" api_page_url)
+    |> Str.global_replace (Str.regexp_string "\"compilerlibref/")
+      (sprintf "\"%s/compilerlibref/" api_page_url)
   in
 
   (* For the main index file, we do a few adjustments *)
@@ -241,7 +248,7 @@ let convert version chapters (title, file) =
           end;
           (* Link to API *)
           let a = create_element "a" ~inner_text:"OCaml API"
-              ~attributes:["href", api_page_url] in
+              ~attributes:["href", api_page_url ^ "/index.html"] in
           let li = create_element "li" in
           (append_child li a;
            append_child toc li)

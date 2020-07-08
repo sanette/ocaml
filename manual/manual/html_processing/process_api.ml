@@ -18,7 +18,7 @@ let compiler_libref = ref false
 (* set this to true to process compilerlibref instead of libref *)
 
 (* output dir *)
-let api_dir = "api"
+let api_dir = with_dir script_dir "api"
 
 let libref = ref ""
 let dst_dir = ref ""

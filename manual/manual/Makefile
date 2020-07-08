@@ -121,6 +121,7 @@ release: all
 web: html
 	dune exec html_processing/process_manual.exe
 	dune exec html_processing/process_api.exe makeindex
+	dune exec html_processing/process_api.exe compiler makeindex
 	dune exec html_processing/process_api.exe overwrite
 	dune exec html_processing/process_api.exe compiler overwrite
 
