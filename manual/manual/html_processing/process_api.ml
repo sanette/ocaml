@@ -329,7 +329,7 @@ module Index = struct
         (* Scan info *)
         let info = match bscanf ch "<%s@>" sid with
           | "/td" -> find ch "</tr>"; ""
-          | "div class=\"info\"" -> 
+          | "div class=\"info\"" ->
             let s = concat_before ch "</td></tr>" in
             "<div class=\"info\">" ^ s
           | s -> raise (Scan_failure s) in
@@ -338,8 +338,7 @@ module Index = struct
         let new_entry = ((mod_name, mod_ref), (val_name, val_ref), info, signature) in
         loop (new_entry :: list) in
     loop []
-    |> extract_infotext;;
-    
+    |> extract_infotext
 end
 (******************************************)
 
@@ -398,6 +397,7 @@ let () =
   compiler_libref := List.mem "compiler" args;
   set_dirs ();
   sys_mkdir !dst_dir;
+  sys_mkdir (with_dir script_dir !libref);
   let overwrite = List.mem "overwrite" args in
   let makeindex = List.mem "makeindex" args in
   let makehtml = List.mem "html" args || not makeindex in
