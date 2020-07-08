@@ -176,7 +176,6 @@ function mySearch (includeDescr) {
 	let words = [];
 	if ( includeDescr ) {
 	    err_index = ERR_INDEX;
-	    //console.log ('err_index=' + parseInt(err_index));
 	    
 	    // Split text into an array of non-empty words:
 	    if ( text.includes("->") ) {
@@ -225,11 +224,9 @@ function mySearch (includeDescr) {
 	console.log("Results = " + (count.toString()));
 	results.length = Math.min(results.length, MAX_RESULTS);
 	html = "no results";
-	//console.log (results[0]);
     }
     // injects new html
     if (results.length > 0) {
-	console.log("Best match has error=" + results[0][err_index].toString());
 	html = "<ul>";
 	function myIter(line, index, array) {
 	    html = html + formatLine(line);
@@ -241,6 +238,5 @@ function mySearch (includeDescr) {
 	}
     }
     document.getElementById("search_results").innerHTML = html;
-    //document.addEventListener( 'click', function ( e ) { console.log ("click-clack"); console.log(e); });
 }
 
