@@ -1,7 +1,7 @@
 # HTML post-processing
 
 This directory contains material for processing the html of the manual
-(in the `../htmlman` directory).
+(from the `../htmlman` directory).
 
 The new html is output in `./docs` (the manual) and `./api` (the api).
 
@@ -21,10 +21,10 @@ make web
 Or, much faster if you know that `htmlman` is already up-to-date:
 
 ```
-	cd ..
-	dune exec html_processing/process_manual.exe silent
-	dune exec html_processing/process_api.exe overwrite silent
-	dune exec html_processing/process_api.exe compiler overwrite silent
+cd ..
+dune exec html_processing/process_manual.exe silent
+dune exec html_processing/process_api.exe overwrite silent
+dune exec html_processing/process_api.exe compiler overwrite silent
 ```
 
 (The `silent` keyword is optional. Remove it to have debug information.)
