@@ -1,7 +1,9 @@
-/* CSS file for the Ocaml API
-   San Vu Ngoc 2019
-*/
+// SOURCE FILE
 
+/* If the above line does not say "SOURCE FILE", then do not edit. It */
+/* means this file is generated from [sass style.scss] */
+
+/* CSS file for the Ocaml API.  San Vu Ngoc 2019 */
 
 // TODO: revoir la table
 // https://sanette.github.io/ocaml-api/compilerlibref/4.08/Arg_helper.Make.html 
@@ -9,54 +11,8 @@
 // (mais attention, ça a des conséquences partout ! Attention aux 
 // tables d'index, et aux tables de type...  
 
-// set this to true for integration into the ocaml.org wesite
-
-$ocamlorg: false;
-   
-/* ocaml logo color */
-$logocolor: #ec6a0d;
-   
-/* Fonts */
-@import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,500');
-@import url('https://fonts.googleapis.com/css?family=Noticia+Text:400,400i,700');
-@import url('https://fonts.googleapis.com/css?family=Fira+Sans:400,400i,500,500i,600,600i,700,700i');
-
-
-/* Reset a few things. */
-
-.container { 
-    margin-left: 0;
-    margin-right: 0;
-}
-
-ul.translations {
-    display: none;
-}
-
-.api {
-    div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	font-size: inherit;
-	font: inherit;
-	line-height: inherit;
-	vertical-align: baseline;
-	text-align: inherit;
-	color: inherit;
-	background: transparent;
-    }
-}
-
-html.smooth-scroll {
-    scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	html {
-	    scroll-behavior: auto;
-	}
-}
+@import "common";
+@charset "UTF-8";
 
 // tables are difficult to style, be careful.
 // These settings should apply to the main index tables
@@ -86,11 +42,11 @@ html.smooth-scroll {
 }
 
 .api {
-    font-size: 16px;
-    font-family: "Fira Sans", Helvetica, Arial, sans-serif;
-    text-align: left;
-    color: #333;
-    background: #FFFFFF;
+    // font-size: 16px;
+    // font-family: "Fira Sans", Helvetica, Arial, sans-serif;
+    // text-align: left;
+    // color: #333;
+    // background: #FFFFFF;
     table { 	
 	// tables are difficult to style, be careful	
 	border-collapse: collapse;
@@ -175,14 +131,7 @@ html.smooth-scroll {
 	box-sizing: border-box; 
     }
     
-    /*top: 45px;*/
-    max-width: 90ex;
-    margin-left: calc(10vw + 20ex);
-    margin-right: 4ex;
-    margin-top: 20px;
-    margin-bottom: 50px;
-    font-family: "Noticia Text", Georgia, serif;
-    line-height: 1.5;
+    @include content-frame;
 
     >header {
 	margin-bottom: 30px;
@@ -733,13 +682,6 @@ html.smooth-scroll {
 
     /* Sidebar and TOC */
 
-    .toc_version {
-	font-size: smaller;
-	text-align: right;
-	a {
-	    color: #888;
-	}
-    }
     /*.toc ul:before */
     .toc_title
     {
@@ -757,32 +699,10 @@ html.smooth-scroll {
     }
 
     .toc {
-	position: fixed;
-	@if $ocamlorg {
-	    top: 0px;
-	} @else {
-	    top: 66px;
+	@include nav-toc;
+	&.brand {
+	    @include brand;
 	}
-	bottom: 0px;
-	left: 0px;
-	max-width: 30ex;
-	min-width: 26ex;
-	width: 20%;
-	background: linear-gradient(to left, #ccc, white);
-	overflow: auto;
-	color: #1F2D3D;
-	padding-left: 2ex;
-	padding-right: 2ex;
-    }
-
-    .toc ul li a {
-	font-family: "Fira Sans", sans-serif;
-	font-size: 0.95em;
-	color: #333;
-	font-weight: 400;
-	line-height: 1.6em;
-	display: block;
-	padding-left: 4px;
     }
 
     .toc input#api_search {
@@ -804,40 +724,6 @@ html.smooth-scroll {
 	}
     }
 
-    .toc ul li a:hover {
-	box-shadow: none;
-	background-color: #edbf84;
-	/* transition: .5s; */
-	/*text-decoration: underline;*/
-    }
-
-    /* First level titles */
-
-    .toc>ul>li>a {
-	font-weight: 500;
-    }
-
-    .toc li ul {
-	margin: 0px;
-    }
-
-    .toc ul {
-	list-style-type: none;
-    }
-
-    .toc ul li {
-	margin: 0;
-    }
-    .toc>ul>li {
-	margin-bottom: 0.3em;
-    }
-
-    .toc ul li li {
-	border-left: 1px solid #ccc;
-	margin-left: 5px;
-	padding-left: 12px;
-    }
-
     .ocaml {
 	background: linear-gradient(to left, white 0%, rgb(243, 247, 246) 100%);
     }
@@ -847,16 +733,9 @@ html.smooth-scroll {
 	line-height: 8pt;
 	font-family: "Fira Mono";
     }
-
-    header nav {
-	display: none;
-    } header nav.toc {
-	display: block;
-	padding-top: 10px;
-    } header dl dd, header dl dt {
+    header dl dd, header dl dt {
 	display: inline-block;
     } 
-
     pre {
 	background: linear-gradient(to left, white 0%, rgb(237, 232, 229) 100%);
     }
@@ -897,30 +776,9 @@ html.smooth-scroll {
     ul.tutos_menu li.active a {
 	color: black;
     }
-
-    .brand img {
-	margin-top: 14px; 
-	// en principe 16
-	
-	height: 36px;
-    }
-
-    .toc.brand {
-	@if $ocamlorg {
-	    display: none;
-	}
-    }
     
     nav.toc {
-	@if $ocamlorg {	
-	    top: 76px; 
-	    // ocaml.org with full banner height
-	}
-    }
 
-    nav.brand {
-	top: 0px;
-	height: 67px;
     }
 
     span.c003 {
@@ -1048,6 +906,7 @@ html.smooth-scroll {
     }
     .search_comment:hover .search_help {
 	height: auto;
+	margin-top:-1px;
 	opacity: 0.8;
 	background: linear-gradient(to bottom, white 0%, rgb(237, 232, 229) 100%);
 	transition: all 0.5s;
@@ -1151,20 +1010,9 @@ html.smooth-scroll {
 	}
 
 	.toc {
-	    position: static;
-	    width: auto;
-	    min-width: unset;
-	    max-width: unset;
-	    border: none;
-	    padding: 0.2em 1em;
-	    /*border-radius: 0 0 5px 5px;*/ /* change this for ocamlorg */
+	    @include nav-toc-mobile;
 	}
 	
-	.toc.brand {
-	    /*border-radius: 5px 5px 0 0;*/
-	    /* border-radius doesn't play well with a global box-shadow */
-	}
-
 	table td {
 	    padding-left: 2%;
 	}
@@ -1239,28 +1087,3 @@ html.smooth-scroll {
     }
 }
 
-    /* Print adjustements. */
-    /* This page can be nicely printed or saved to PDF (local version) */
-
-@media print {
-    body {
-	color: black;
-	background: white;
-    }
-    body nav:first-child {
-	position: absolute;
-	background: transparent;
-    }
-    .api {    
-	nav.toc {
-	    margin-right: 1em;
-	    float: left;
-	}
-	.toc {
-	    position: initial;
-	    background: #eee;
-	}
-	margin-left: 3em;
-	margin-right: 3em;
-    }
-}

@@ -119,10 +119,7 @@ release: all
 	tar cf - infoman/ocaml.info* | gzip > $(RELEASE)refman.info.tar.gz
 
 web: html
-	dune exec docs_make/process.exe
-	dune exec api_make/process.exe makeindex
-	dune exec api_make/process.exe overwrite
-	dune exec api_make/process.exe compiler overwrite
+	$(MAKE) -C html_processing all
 
 files: $(FILES)
 	$(MAKE) -C cmds      all
@@ -170,10 +167,9 @@ clean:
 	$(MAKE) -C library   clean
 	$(MAKE) -C refman    clean
 	$(MAKE) -C tutorials clean
+	$(MAKE) -C html_processing clean
 	-rm -f texstuff/*
 	cd htmlman; rm -rf libref compilerlibref index.html \
 	manual*.html *.haux *.hind *.svg
 	cd textman; rm -f manual.txt *.haux *.hind
 	cd infoman; rm -f ocaml.info ocaml.info-*  *.haux *.hind
-	rm -rf docs/
-	rm -rf api/
