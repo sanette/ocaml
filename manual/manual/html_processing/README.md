@@ -44,6 +44,6 @@ Look at the `Makefile`: the `quiet` keyword is optional. Remove it to
 have debug information.
 
 By default all html files are re-created by `make`, but the javascript
-index ``webman/api/index.js` and `webman/api/compilerlibref/index.js`
+index `webman/api/index.js` and `webman/api/compilerlibref/index.js`
 are kept if they already exist. You can use `make clean` to delete all
 generated files.
