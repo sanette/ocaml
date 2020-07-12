@@ -14,11 +14,26 @@ let process_dir = "."
 (* Output directory *)
 let web_dir = "../webman"
 
+(* Output for manual *)
+let docs_maindir = with_dir web_dir "manual"
+let docs_file = with_dir docs_maindir
+
+(* Ouput for API *)
+let api_dir = with_dir web_dir "api"
+
+(* How to go from manual to api *)
+let api_page_url = "../api"
+
+(* How to go from api to manual *)
+ let manual_page_url = "../manual"
+
 (* Set this to the directory where to find the html sources of all versions: *)
 let html_maindir = "../htmlman"
-  
+
 (* Where to get the original html files *)
 let html_file = with_dir html_maindir
+
+let releases_url = "https://ocaml.org/releases/"
 
 (**** utilities ****)
 

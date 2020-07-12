@@ -12,13 +12,8 @@ open Soup
 open Printf
 open Common
 
-let releases_url = "https://ocaml.org/releases/"
-
 let compiler_libref = ref false
 (* set this to true to process compilerlibref instead of libref *)
-
-(* output dir *)
-let api_dir = with_dir web_dir "api"
 
 let libref = ref ""
 let dst_dir = ref ""
@@ -95,25 +90,25 @@ let process ?(search=true) ~version file out =
     append_child ul !li_current;
     match attribute "id" h with
     | Some id ->
-      let href = "#" ^ id in
-      let a = create_element "a" ~inner_text:(texts h |> String.concat "") ~attributes:["href", href] in
-      append_child !li_current a
+        let href = "#" ^ id in
+        let a = create_element "a" ~inner_text:(texts h |> String.concat "") ~attributes:["href", href] in
+        append_child !li_current a
     | None -> () in
 
   descendants body
   |> elements
   |> iter (fun h -> match name h with
       | "h2" ->
-        h3_open := false;
-        li_of_h ul h
+          h3_open := false;
+          li_of_h ul h
       | "h3" when !h3_open ->
-        li_of_h !h3_current h
+          li_of_h !h3_current h
       | "h3" ->
-        h3_open := true;
-        h3_current := create_element "ul";
-        append_child ul !li_current;
-        append_child !li_current !h3_current;
-        li_of_h !h3_current h
+          h3_open := true;
+          h3_current := create_element "ul";
+          append_child ul !li_current;
+          append_child !li_current !h3_current;
+          li_of_h !h3_current h
       | _ -> ());
   let title = soup $ "title" |> R.leaf_text in
   let href = let base = Filename.basename file in
@@ -128,26 +123,29 @@ let process ?(search=true) ~version file out =
   (* This only happens for "index.html" *)
   let () = match body $? "ul.indexlist" with
     | Some uli ->
-      delete uli;
-      append_child ul uli;
-      unwrap uli;
-      if search then search_widget true |> prepend_child body;
-      create_element "h1" ~inner_text:
-        (sprintf "The OCaml %sAPI"
-           (if !compiler_libref then "Compiler " else ""))
-      |> prepend_child body;
+        delete uli;
+        append_child ul uli;
+        unwrap uli;
+        if search then search_widget true |> prepend_child body;
+        create_element "h1" ~inner_text:
+          (sprintf "The OCaml %sAPI"
+             (if !compiler_libref then "Compiler " else ""))
+        |> prepend_child body;
     | None ->
-      if search then search_widget false |> prepend_child nav;
-      (* Add "general index" link to all other files *)
-      create_element "a" ~inner_text:"< General Index"
-        ~attributes:["href", "index.html"]
-      |> prepend_child nav in
+        if search then search_widget false |> prepend_child nav;
+        (* Add "general index" link to all other files *)
+        create_element "a" ~inner_text:"< General Index"
+          ~attributes:["href", "index.html"]
+        |> prepend_child nav in
 
   (* Add version number *)
-  add_version_link nav ("API Version " ^ version) releases_url;
+  add_version_link nav ((if !compiler_libref then "Compiler " else "") ^
+                        "API Version " ^ version) releases_url;
 
   (* Add logo *)
-  prepend_child header (logo_html "../docs/index.html");
+  prepend_child header (logo_html
+                          ((if !compiler_libref then "../" else "") ^
+                           (manual_page_url ^ "/index.html")));
 
   sprintf "Saving %s..." out |> pr;
 

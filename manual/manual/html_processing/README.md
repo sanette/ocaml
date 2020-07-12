@@ -5,8 +5,12 @@ and the API (from the `../htmlman` directory), including a quick
 search widget for the API.
 
 The process will create the `../webman` dir, and output the new html
-files (and assets) in `webman/docs` (the manual) and `webman/api` (the
+files (and assets) in `webman/manual` (the manual) and `webman/api` (the
 API).
+
+For building the manual/api for OCaml versions <= 4.10, see
+https://github.com/sanette/ocaml-tutorial and
+https://github.com/sanette/ocaml-api
 
 ## manual and api
 
@@ -36,7 +40,7 @@ From the `html_processing` directory:
 
 `firefox ../webman/api/index.html`
 
-`firefox ../webman/docs/index.html`
+`firefox ../webman/manual/index.html`
 
 ## Debug
 

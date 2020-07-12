@@ -16,19 +16,9 @@ open Soup
 open Printf
 open Common
 
-(* Set this to the destination directory: *)
-let docs_maindir = with_dir web_dir "manual"
-
 (* Alternative formats for the manual: *)
 let archives =
   ["refman-html.tar.gz"; "refman.txt"; "refman.pdf"; "refman.info.tar.gz"]
-
-(* Where to save the modified html files *)
-let docs_file = with_dir docs_maindir
-
-(* API pages, relative to docs_maindir *)
-let api_page_url = "../api"
-let releases_url = "https://ocaml.org/releases/"
 
 (* Remove number: "Chapter 1  The core language" ==> "The core language" *)
 let remove_number s =
@@ -246,9 +236,14 @@ let convert version chapters (title, file) =
               (append_child li a;
                append_child toc li)
           end;
-          (* Link to API *)
+          (* Link to APIs *)
           let a = create_element "a" ~inner_text:"OCaml API"
               ~attributes:["href", api_page_url ^ "/index.html"] in
+          let li = create_element "li" in
+          (append_child li a;
+           append_child toc li);
+          let a = create_element "a" ~inner_text:"OCaml Compiler API"
+              ~attributes:["href", api_page_url ^ "/compilerlibref/index.html"] in
           let li = create_element "li" in
           (append_child li a;
            append_child toc li)
