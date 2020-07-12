@@ -34,8 +34,9 @@ within the `html_processing` dir:
 make
 ```
 
-In any case you need a working [`sass`](https://sass-lang.com/) CSS
-processor (tested with version "3.4.23").
+The scripts should run with `ocaml >= 4.05`.  You also need a working
+[`sass`](https://sass-lang.com/) CSS processor (tested with version
+"3.4.23").
 
 ## How to browse
 
