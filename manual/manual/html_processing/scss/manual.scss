@@ -1,63 +1,23 @@
-@charset "UTF-8";
-
 // SOURCE FILE
 
-/* If the above line does not say "SOURCE FILE", then do not edit. It
-means this file is generated from [sass manual.scss] */
+/* If the above line does not say "SOURCE FILE", then do not edit. It */
+/* means this file is generated from [sass manual.scss] */
 
-/* CSS file for the Ocaml manual, part I,
-https://sanette.github.io/ocaml-tutorial/core_tutorial.html */
+/* CSS file for the Ocaml manual */
 
-/* Distributed under the ISC licence.  San Vu Ngoc, 2019-2020 */
+/* San Vu Ngoc, 2019-2020 */
 
-/* ocaml logo color */
-$logocolor: #ec6a0d;
-$logo_height:67px;
+@import "common";
+@charset "UTF-8";
 
-/* Fonts */
-@import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500);
-@import url(https://fonts.googleapis.com/css?family=Noticia+Text:400,400i,700);
-@import url(https://fonts.googleapis.com/css?family=Fira+Sans:400,400i,500,500i,600,600i,700,700i);
-
-/* Reset */
-.pre,a,b,body,code,div,em,form,h1,h2,h3,h4,h5,h6,header,html,i,img,li,mark,menu,nav,object,output,p,pre,s,section,span,time,ul,var{
-    margin:0;
-    padding:0;
-    border:0;
-    font-size:inherit;
-    font:inherit;
-    line-height:inherit;
-    vertical-align:baseline;
-    text-align:inherit;
-    color:inherit;
-    background:0 0
-}
-*,:after,:before{
-    box-sizing:border-box
-}
-body{
-    font-family:"Fira Sans",Helvetica,Arial,sans-serif;
-    text-align:left;
-    color:#333;
-    background:#fff
-}
-html {
-    font-size: 16px;
-}
 .content{
-    max-width:90ex;
-    margin-left:calc(10vw + 20ex);
-    margin-right:4ex;
-    margin-top:20px;
-    margin-bottom:50px;
-    font-family:"Noticia Text",Georgia,serif;
-    line-height:1.5
-}
-.content>header{
-    margin-bottom:30px
-}
-.content>header nav{
-    font-family:"Fira Sans",Helvetica,Arial,sans-serif
+    @include content-frame;
+    &>header{
+	margin-bottom:30px
+    }
+    &>header nav{
+	font-family:"Fira Sans",Helvetica,Arial,sans-serif
+    }
 }
 .index{ /* index.html */
     ul{
@@ -214,28 +174,9 @@ ul.itemize li::before{
 
 /* Table of Contents in the Left-hand sidebar */
 nav.toc{
-    top:$logo_height;
-    padding-top: 10px;
-    position:fixed;
-    bottom:0;
-    left:0;
-    max-width:30ex;
-    min-width:26ex;
-    width:20%;
-    background:linear-gradient(to left,#ccc,transparent);
-    overflow:auto;
-    color:#1f2d3d;
-    padding-left:2ex;
-    padding-right:2ex;
+    @include nav-toc;
     &.brand{
-	top:0;
-	height:$logo_height;
-    }
-    .toc_version {
-	font-size:smaller;
-	text-align:right;
-	a {
-	    color:#888}
+	@include brand;
     }
     .toc_title{
 	display:block;
@@ -245,43 +186,7 @@ nav.toc{
 /*     font-size:1em; */
 /*     line-height:1.2; */
     /*     font-weight:500} */
-    ul{
-	list-style-type:none;
-	li{
-	    margin:0;
-	    ul{
-		margin:0
-	    }
-	    li{
-		border-left:1px solid #ccc;
-		margin-left:5px;
-		padding-left:12px;
-	    }
-	    a {
-		font-family:"Fira Sans",sans-serif;
-		font-size:.95em;
-		color:#333;
-		font-weight:400;
-		line-height:1.6em;
-		display:block;
-		&:hover {
-		    box-shadow:none;
-		    background-color: #edbf84;}
-	    }
-	    &.top a {
-		color: #848484;
-		&:hover {
-		    background-color: unset;
-		    text-decoration: underline;
-		}
-	    }
-	}
-    }
-    &>ul>li {
-	margin-bottom:.3em;
-	&>a {
-	    font-weight:500;}
-    }
+
 }
 .tableau {
     table {
@@ -302,49 +207,13 @@ nav.toc{
 	padding:2em
     }
     nav.toc{
-	position:static;
-	width:auto;
-	min-width:unset;
-	max-width:unset;
-	border:none;
-	padding:.2em 1em;
-	border-radius:5px}
-}
-
-/* Print (or PDF) */
-@media print{
-    body{
-	color:#000;
-	background:#fff
-    }
-    body nav:first-child{
-	position:absolute;
-	background:0 0
-    }
-    nav.toc{
-	margin-right:1em;
-	float:left
-    }
-    nav.toc{
-	position:initial;
-	background:#eee
-    }
-    .content{
-	margin-left:3em;
-	margin-right:3em
-    }
+	@include nav-toc-mobile;}
 }
 
 .ocaml{ 
     background:linear-gradient(to left,#fff 0,#f3f7f6 100%)
 }
 
-header nav{
-    display:none
-}
-header nav.toc{
-    display:block
-}
 .pre,pre{
     background:linear-gradient(to left,#fff 0,#ede8e5 100%)
 }
@@ -376,11 +245,6 @@ ul.part_menu{
 ul.part_menu li.active a{
     color:#000
 }
-.brand img{
-    margin-top:14px;
-    height:36px
-}
-
 span.c003{
     font-family:"Fira Mono",courier;
     background-color:#f3ece6;

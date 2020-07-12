@@ -1,38 +1,49 @@
 # HTML post-processing
 
-This directory contains material for processing the html of the manual
-(from the `../htmlman` directory).
+This directory contains material for enhancing the html of the manual
+and the API (from the `../htmlman` directory), including a quick
+search widget for the API.
 
-The new html is output in `./docs` (the manual) and `./api` (the api).
+The process will create the `../webman` dir, and output the new html
+files (and assets) in `webman/docs` (the manual) and `webman/api` (the
+API).
 
 ## manual and api
 
-There are two different scripts, `process_manual.ml` and `process_api.ml`.
-The first one deals with all the chapters of the manual,
-while the latter deals with the api generated with `ocamldoc`.
+There are two different scripts, `process_manual.ml` and
+`process_api.ml`.  The first one deals with all the chapters of the
+manual, while the latter deals with the api generated with `ocamldoc`.
+They both use a common module `common.ml`.
 
 ## How to build
 
+With dependencies to build the whole manual:
 ```
 cd ..
 make web
 ```
 
-Or, much faster if you know that `htmlman` is already up-to-date:
+Or, much faster if you know that `htmlman` is already up-to-date, from
+within the `html_processing` dir:
 
 ```
-cd ..
-dune exec html_processing/process_manual.exe silent
-dune exec html_processing/process_api.exe overwrite silent
-dune exec html_processing/process_api.exe compiler overwrite silent
+make
 ```
-
-(The `silent` keyword is optional. Remove it to have debug information.)
 
 ## How to browse
 
 From the `html_processing` directory:
 
-`firefox api/index.html`
+`firefox ../webman/api/index.html`
 
-`firefox docs/index.html`
+`firefox ../webman/docs/index.html`
+
+## Debug
+
+Look at the `Makefile`: the `quiet` keyword is optional. Remove it to
+have debug information.
+
+By default all html files are re-created by `make`, but the javascript
+index ``webman/api/index.js` and `webman/api/compilerlibref/index.js`
+are kept if they already exist. You can use `make clean` to delete all
+generated files.

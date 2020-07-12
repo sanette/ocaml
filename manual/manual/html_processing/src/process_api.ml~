@@ -401,8 +401,10 @@ let () =
   let overwrite = List.mem "overwrite" args in
   let makeindex = List.mem "makeindex" args in
   let makehtml = List.mem "html" args || not makeindex in
+  let makecss = List.mem "css" args in
   if makehtml then process_html overwrite version;
   if makeindex then process_index ();
+  if makecss then compile_css "style.scss" (with_dir !dst_dir "style.css");
   copy_files ();
   print_endline "DONE."
 

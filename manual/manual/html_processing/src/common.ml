@@ -2,17 +2,21 @@ open Soup
 open Printf
 
 let debug = Array.to_list Sys.argv
-            |> List.mem "silent"
+            |> List.mem "quiet"
             |> not
 
 let pr = if debug then print_endline else fun _ -> ()
 
 let with_dir = Filename.concat
 
-let script_dir = "html_processing"
+let process_dir = "."
+
+(* Output directory *)
+let web_dir = "../webman"
 
 (* Set this to the directory where to find the html sources of all versions: *)
-let html_maindir = "htmlman"
+let html_maindir = "../htmlman"
+  
 (* Where to get the original html files *)
 let html_file = with_dir html_maindir
 
@@ -86,14 +90,14 @@ let sys_mv file dst =
 
 (* Compile scss with sass *)
 let compile_css src dst =
-  let src = with_dir script_dir src in
+  let src = with_dir process_dir src in
   if Sys.command (sprintf "sass %s > %s" src dst) <> 0
   then sprintf "Could not compile %s to %s. Is sass installed?" src dst
        |> failwith
 
 (* Detect OCaml version from version.tex *)
 let find_version () =
-  let versiontex = "version.tex" in
+  let versiontex = "../version.tex" in
   Scanf.bscanf (Scanf.Scanning.from_file versiontex)
     "\\def\\ocamlversion{%s@}" (fun a -> a)
 
