@@ -41,6 +41,8 @@ matrix:
         packages:
         - texlive-latex-extra
         - texlive-fonts-recommended
+        - ruby-sass
+        - hevea
   - env: >-
       CI_KIND=build
       XARCH=x64
