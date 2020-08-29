@@ -61,8 +61,7 @@ let process ?(search=true) ~version file out =
 
   (* Add favicon *)
   let head = soup $ "head" in
-  {|<link rel="shortcut icon" type="image/x-icon" href="|} ^ favicon () ^ {|">|}
-  |> parse
+  parse ({|<link rel="shortcut icon" type="image/x-icon" href="|} ^ favicon () ^ {|">|})
   |> append_child head;
 
   (* Add api wrapper *)
