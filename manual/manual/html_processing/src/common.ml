@@ -66,9 +66,7 @@ let flat_option f = function
 
 let (<<) f g x = f (g x)
 
-let string_of_opt = function
-  | None -> ""
-  | Some s -> s
+let string_of_opt = Option.value ~default:""
 
 let starts_with substring s =
   let l = String.length substring in
