@@ -54,7 +54,6 @@ html: htmlman/libref/style.css htmlman/compilerlibref/style.css etex-files
 htmlman/libref/style.css: style.css $(STDLIB_MLIS) $(DOC_STDLIB_TEXT)
 	mkdir -p htmlman/libref
 	$(OCAMLDOC) -colorize-code -sort -html \
-	  -charset "UTF-8" \
 	  -d htmlman/libref \
 	  $(DOC_STDLIB_INCLUDES) \
           $(DOC_STDLIB_TEXT:%=-text %) \
@@ -72,7 +71,6 @@ htmlman/compilerlibref/style.css: library/compiler_libs.txt style.css \
   $(COMPILERLIBS_MLIS)
 	mkdir -p htmlman/compilerlibref
 	$(OCAMLDOC) -colorize-code -sort -html \
-	  -charset "UTF-8" \
 	  -d htmlman/compilerlibref \
 	  -I $(SRC)/stdlib \
 	  $(DOC_COMPILERLIBS_INCLUDES) \
